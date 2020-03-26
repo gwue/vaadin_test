@@ -55,6 +55,7 @@ public class MainView extends HorizontalLayout {
         // Use TextField for standard text input
         TextField textField = new TextField("Your name");
 
+
         // Button click listeners can be defined as lambda expressions
         Button button = new Button("Say hello", e -> {
             PileEntry entry = new PileEntry(textField.getValue());
