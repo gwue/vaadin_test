@@ -109,6 +109,7 @@ public class MainView extends HorizontalLayout {
         System.out.println(tr);
         TestData td = new TestData();
         tr.save(td);
+        
         System.out.println(tr.count()); 
     }
 
