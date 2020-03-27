@@ -5,6 +5,8 @@ import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Label;
@@ -69,9 +71,11 @@ public class PileEntry extends CustomField<String> {
     }
 
     private final Button nextStateButton, prevStateButton;
+    private final Button deleteButton;
     private final Label name;
     private PileState state;
     private Set<PropertyChangeListener> listeners;
+    
 
     public PileEntry(String name) {
         this(name, PileState.NEW);
@@ -82,6 +86,7 @@ public class PileEntry extends CustomField<String> {
         this.state = state;
         HorizontalLayout layout = new HorizontalLayout();
 
+        deleteButton = new Button("D");
         nextStateButton = new Button("N");
         nextStateButton.addClickListener(e -> {
             PileState old = this.state;
@@ -110,6 +115,10 @@ public class PileEntry extends CustomField<String> {
     public void removeStateListener(PropertyChangeListener l) {
         this.listeners.remove(l);
     }
+
+    public void addDeleteListener(ComponentEventListener<ClickEvent<Button>> l) {
+        this.deleteButton.addClickListener(l);
+    } 
 
     private void processStateUpdate(PileState oldState) {
         if (this.state == PileState.last()) {

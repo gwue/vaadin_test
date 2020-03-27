@@ -1,5 +1,7 @@
 package org.vaadin.example;
 
+import javax.sql.DataSource;
+
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -43,7 +45,7 @@ public class MainView extends HorizontalLayout {
      * @param service The message service. Automatically injected Spring managed
      *                bean.
      */
-    public MainView(@Autowired GreetService service) {
+    public MainView(@Autowired GreetService service, @Autowired TestRepository tr) {
 
         Header h1 = new Header(), h2 = new Header(), h3 = new Header();
         h1.add("Pile of shame");
@@ -104,6 +106,10 @@ public class MainView extends HorizontalLayout {
         v3.add(h3);
 
         add(v1, v2, v3);
+        System.out.println(tr);
+        TestData td = new TestData();
+        tr.save(td);
+        System.out.println(tr.count()); 
     }
 
 }
