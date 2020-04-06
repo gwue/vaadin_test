@@ -12,6 +12,10 @@ import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 public class PileEntry extends CustomField<String> {
 
     /**
@@ -19,7 +23,7 @@ public class PileEntry extends CustomField<String> {
      */
     private static final long serialVersionUID = -2825259205459205501L;
 
-    enum PileState {
+    public enum PileState {
         NEW {
 
             @Override
@@ -73,38 +77,33 @@ public class PileEntry extends CustomField<String> {
     private final Button nextStateButton, prevStateButton;
     private final Button deleteButton;
     private final Label name;
-    private PileState state;
+    private PileEntryData data;
     private Set<PropertyChangeListener> listeners;
-    
 
-    public PileEntry(String name) {
-        this(name, PileState.NEW);
-    }
-
-    public PileEntry(String name, PileState state) {
+    public PileEntry( PileEntryData data) {
+        this.data=data;
         this.listeners = new HashSet<>();
-        this.state = state;
         HorizontalLayout layout = new HorizontalLayout();
 
         deleteButton = new Button("D");
         nextStateButton = new Button("N");
         nextStateButton.addClickListener(e -> {
-            PileState old = this.state;
-            this.state = this.state.next();
+            PileState old = this.data.getState();
+            this.data.setState(this.data.getState().next());
             processStateUpdate(old);
         });
 
         prevStateButton = new Button("P");
         prevStateButton.addClickListener(e -> {
-            PileState old = this.state;
-            this.state = this.state.previous();
+            PileState old = this.data.getState();
+            this.data.setState(this.data.getState().previous());
             processStateUpdate(old);
         });
 
-        processStateUpdate(this.state);
-        this.name = new Label(name);
+        processStateUpdate(this.data.getState());
+        this.name = new Label(data.getName());
 
-        layout.add(this.name, nextStateButton, prevStateButton);
+        layout.add(this.name, nextStateButton, prevStateButton, deleteButton);
         add(layout);
     }
 
@@ -118,22 +117,22 @@ public class PileEntry extends CustomField<String> {
 
     public void addDeleteListener(ComponentEventListener<ClickEvent<Button>> l) {
         this.deleteButton.addClickListener(l);
-    } 
+    }
 
     private void processStateUpdate(PileState oldState) {
-        if (this.state == PileState.last()) {
+        if (this.data.getState() == PileState.last()) {
             nextStateButton.setEnabled(false);
         } else {
             nextStateButton.setEnabled(true);
         }
-        if (this.state == PileState.first()) {
+        if (this.data.getState() == PileState.first()) {
             prevStateButton.setEnabled(false);
         } else {
             prevStateButton.setEnabled(true);
         }
-        if (oldState != this.state) {
+        if (oldState != this.data.getState()) {
             for (PropertyChangeListener l : listeners) {
-                PropertyChangeEvent evt = new PropertyChangeEvent(this, "state", oldState, this.state);
+                PropertyChangeEvent evt = new PropertyChangeEvent(this, "state", oldState, this.data.getState());
                 l.propertyChange(evt);
             }
         }

@@ -1,7 +1,5 @@
 package org.vaadin.example;
 
-import javax.sql.DataSource;
-
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -12,7 +10,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.material.Material;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.vaadin.example.PileEntry.PileState;
 
 /**
@@ -27,6 +29,8 @@ import org.vaadin.example.PileEntry.PileState;
  * tab/window.
  */
 @Route
+//@NoTheme
+@Theme(Material.class)
 @PWA(name = "Vaadin Application", shortName = "Vaadin App", description = "This is an example Vaadin application.", enableInstallPrompt = true)
 @CssImport("./styles/shared-styles.css")
 @CssImport(value = "./styles/vaadin-text-field-styles.css", themeFor = "vaadin-text-field")
@@ -45,7 +49,7 @@ public class MainView extends HorizontalLayout {
      * @param service The message service. Automatically injected Spring managed
      *                bean.
      */
-    public MainView(@Autowired GreetService service, @Autowired TestRepository tr) {
+    public MainView(@Autowired ApplicationContext context, @Autowired GreetService service, @Autowired PileEntryDataRepository repo) {
 
         Header h1 = new Header(), h2 = new Header(), h3 = new Header();
         h1.add("Pile of shame");
@@ -57,10 +61,10 @@ public class MainView extends HorizontalLayout {
         // Use TextField for standard text input
         TextField textField = new TextField("Your name");
 
-
         // Button click listeners can be defined as lambda expressions
         Button button = new Button("Say hello", e -> {
-            PileEntry entry = new PileEntry(textField.getValue());
+            PileEntryData pileEntryData = new PileEntryData(textField.getValue());
+            PileEntry entry = new PileEntry(pileEntryData);
             v1.addComponentAtIndex(1, entry);
             entry.addStateListener(l -> {
                 PileState oldState = (PileState) l.getOldValue();
@@ -85,7 +89,11 @@ public class MainView extends HorizontalLayout {
                     case DONE:
                         v3.addComponentAtIndex(1,entry);
                 }
-
+            });
+            entry.addDeleteListener(l -> {
+                v1.getChildren().filter(c -> c.equals(entry)).forEach(c -> v1.remove(c));
+                v2.getChildren().filter(c -> c.equals(entry)).forEach(c -> v2.remove(c));
+                v3.getChildren().filter(c -> c.equals(entry)).forEach(c -> v3.remove(c));
             });
         });
 
@@ -106,11 +114,6 @@ public class MainView extends HorizontalLayout {
         v3.add(h3);
 
         add(v1, v2, v3);
-        System.out.println(tr);
-        TestData td = new TestData();
-        tr.save(td);
-        
-        System.out.println(tr.count()); 
     }
 
 }
